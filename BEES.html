@@ -1,0 +1,151 @@
+<!--
+Vincent Ho
+BEES.html
+11/5/21
+To pollinate some flowers!
+-->
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+ <meta charset="UTF-8">
+ <title>BEEEEEEES</title>
+ 
+	 <script type="text/javascript"
+	 src = "simpleGame.js">
+	 </script>
+	 
+	 <script type = "text/javascript"
+	 src = "beeLib.js"></script>
+	 
+	 <script type="text/javascript">
+		 var scene;
+		 var bee;
+		 var beeJr; // if a friend wants to join
+		 var flowers;
+		 var grass;
+		 var scoreBoard;
+		 var hits;
+		 var collectMP3;
+		 var numFlowers = 10;
+		 var maxTime = 60;
+		 var multi = false; // to check for multiplayer
+		 var timed = false; // to check if they want to do a timed game
+		 var timer;
+		 var time;
+		 
+		 function init(){ 
+			 scoreBoard = document.getElementById("scoreBoard");
+			 hits = 0;
+			 timer = new Timer();
+			 scene = new Scene();
+			 scene.setBG("blue");
+			 
+			 bee = new Bee();
+			 
+			 grass = new Sprite(scene, "grass.png", 800, 600);
+			 grass.setSpeed(0);
+			 grass.setPosition(400,300);
+			 
+			 collectMP3 = new Sound("collect.mp3");
+			 
+			 setUpflower();
+			 
+			 scene.start();
+		 } // end init
+		 
+		 function update(){
+			 scene.clear();
+			 checkTime();
+			 bee.checkKeys();
+			 if(multi){
+			 beeJr.checkKeys();
+			 }// checks if there is a bee to check keys on
+			 grass.update();
+			 for (i = 0; i < numFlowers; i++){
+				 checkCollisions(i);
+				 flower[i].update();
+			 } // end for loop
+			 bee.update();
+			 if (multi){
+			 beeJr.update();
+			 }// end if -- checks if it needs to update another bee
+		 } // end update();
+		 
+		 function setUpflower(){
+			 flower = new Array(numFlowers);
+			 for (i = 0; i < numFlowers; i++){
+			 flower[i] = new Flower();
+			 } // end for
+		 } // end setupflower
+		 
+		 function checkCollisions(FlowerNum){
+			if (bee.collidesWith(flower[FlowerNum])){
+			 flower[FlowerNum].reset();
+			 collectMP3.play();collectMP3.play();
+			 hits += 1;
+			 updateScore();
+			} // end if
+			if(multi){
+				if (beeJr.collidesWith(flower[FlowerNum])){
+				 flower[FlowerNum].reset();
+				 collectMP3.play();
+				 hits += 1;
+				 updateScore();
+				} // end if
+			 }//end if - multiplayer check
+			 } // end checkCollisions
+		 
+		 function updateScore(){
+			 //update the scoreboard
+			 scoreBoard.innerHTML = "Hits: " + hits + ". Time: " + time;
+		 } // end updateScore
+		 
+		 function checkTime(){
+			 time = timer.getElapsedTime();
+			 if (timed){
+				 if (time > maxTime){
+				 scene.stop();
+				 } // end if 
+			}// end if -- checks for timed challenge
+			 updateScore();
+		 } // end checkTime
+		 
+		 function restart(){
+			document.location.href = "";
+		 } // end restart
+		 
+		 function multiplayer(){
+			multi = true;
+			beeJr = new BeeJr();
+		 }// end multiplayer
+		 
+		 function challenge(){
+			timed = true;
+			hits = 0;
+			timer.reset();
+		 }//end challenge
+		 
+	 </script>
+</head>
+<body onload = "init()">
+	 <div id = "output"> empty </div>
+	 <div id = "instructions"> Bee One: UP DOWN LEFT RIGHT</div>
+	 <div id = "instructions2"> Bee Two: WASD</div>
+	 <div id = "scoreBoard">Hits: 0</div>
+	 <div id = "reset">
+		 <button type = "button"
+		 onclick = "restart()">
+			Play again
+		 </button>
+		 <button type = "button"
+		 onclick = "multiplayer()">
+			Add a Friend
+		 </button>
+		 		 <button type = "button"
+		 onclick = "challenge()">
+			60s Challenge!
+		 </button>
+	 </div>
+</body>
+</html>
